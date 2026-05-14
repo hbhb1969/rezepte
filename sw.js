@@ -1,18 +1,7 @@
-const CACHE_NAME = 'rezepte-v1';
-const ASSETS = [
-  '/rezepte/rezepte.html',
-  '/rezepte/manifest.json',
-  '/rezepte/icon-192.png',
-  '/rezepte/icon-512.png'
-];
+const CACHE_NAME = 'rezepte-v2';
 
-// Install: alle Assets cachen
+// Install: sofort aktivieren, kein Pre-Caching das scheitern könnte
 self.addEventListener('install', function(e) {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -24,26 +13,32 @@ self.addEventListener('activate', function(e) {
         keys.filter(function(k) { return k !== CACHE_NAME; })
             .map(function(k) { return caches.delete(k); })
       );
+    }).then(function() {
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-// Fetch: Cache-first
+// Fetch: Network-first, bei Fehler Cache
 self.addEventListener('fetch', function(e) {
+  // Nur GET-Requests behandeln
+  if (e.request.method !== 'GET') return;
+
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      return cached || fetch(e.request).then(function(response) {
-        // Neue Ressourcen auch cachen
+    fetch(e.request).then(function(response) {
+      // Erfolgreiche Antwort im Cache speichern
+      if (response.ok) {
         var clone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
           cache.put(e.request, clone);
         });
-        return response;
-      });
+      }
+      return response;
     }).catch(function() {
-      // Offline-Fallback
-      return caches.match('/rezepte/rezepte.html');
+      // Offline: aus Cache liefern
+      return caches.match(e.request).then(function(cached) {
+        return cached || caches.match('/rezepte/rezepte.html');
+      });
     })
   );
 });
