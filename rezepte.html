@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Meine Rezepte</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%232d6a4f'/><path d='M20 28h24v14a4 4 0 01-4 4H24a4 4 0 01-4-4V28z' fill='%23fff'/><rect x='28' y='18' width='3' height='10' rx='1.5' fill='%23fff'/><rect x='33' y='18' width='3' height='10' rx='1.5' fill='%23fff'/><rect x='16' y='27' width='32' height='4' rx='2' fill='%23fff'/><rect x='29' y='42' width='6' height='5' rx='1' fill='%23fff'/><rect x='24' y='46' width='16' height='3' rx='1.5' fill='%23fff'/></svg>">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1b4332">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rezepte">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <style>
 :root {
   --gd: #1b4332; --gm: #2d6a4f; --gl: #52b788; --gp: #d8f3dc;
@@ -1472,11 +1478,7 @@ function escAttr(s) {
 
 // ── Service Worker ─────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  try {
-    var swCode = "const C='rz-v1';self.addEventListener('install',e=>{self.skipWaiting();});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});";
-    var blob = new Blob([swCode], {type: 'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(blob));
-  } catch(e) {}
+  navigator.serviceWorker.register('sw.js').catch(function() {});
 }
 
 init();
